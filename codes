@@ -19,11 +19,11 @@ for(page in 1:30){
   if(length(reviews)==0)break; 
   all.reviews<-c(all.reviews,reviews)
 }
-all.reviews지
+all.reviews
 
 #디폴트로 들어간 문자 제거
 all.reviews <- all.reviews[!str_detect(all.reviews,"평점")]
-all.reviews거
+all.reviews
 
 #데이터 정제
 all.reviews <- gsub('\r','',all.reviews)
