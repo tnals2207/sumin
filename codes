@@ -1,0 +1,50 @@
+install.packages("rvest")
+install.packages("KoNLP")
+install.packages("stringr")
+install.packages("wordcloud")
+library(rvest)
+library(KoNLP)
+library(stringr)
+library(wordcloud)
+url_base <- 'https://movie.daum.net/moviedb/grade?movieId=93004&type=netizen&page='
+all.reviews <- c()
+#1페이지부터 30페이지까지
+for(page in 1:30){
+  url <- paste(url_base,page,sep="") 
+  htxt <- read_html(url)
+  comments <- html_nodes(htxt,'div')%>% html_nodes('p')
+  reviews <- html_text(comments)
+  reviews <- repair_encoding(reviews,from = 'utf-8')
+  reviews <- str_trim(reviews) 
+  if(length(reviews)==0)break; 
+  all.reviews<-c(all.reviews,reviews)
+}
+all.reviews지
+
+#디폴트로 들어간 문자 제거
+all.reviews <- all.reviews[!str_detect(all.reviews,"평점")]
+all.reviews거
+
+#데이터 정제
+all.reviews <- gsub('\r','',all.reviews)
+all.reviews
+
+#단어 빈도수
+noun <- sapply(all.reviews,extractNoun,USE.NAMES=F)
+noun2 <- unlist(noun)
+wordcount <- table(noun2)
+noun2 <- Filter(function(x){nchar(x) >=2},noun2)
+wordcount <- table(noun2)
+head(sort(wordcount,decreasing=T),10)
+
+#워드클라우드
+library(RColorBrewer)
+palete <- brewer.pal(9,"Set1")
+wordcloud(names(wordcount),freq = wordcount,scale=c(5,0,5),rot.per = 0.25,
+          min.freq=1,random.order = F,random.color=T,colors=palete)
+
+#파이차트
+a <- head(sort(wordcount,decreasing = T),10)
+pct <- round(a/sum(a)*100,1)
+lab <- paste(names(a),"\n",pct,"%")
+pie(a,main="영화",cex=0.8,labels=lab)
